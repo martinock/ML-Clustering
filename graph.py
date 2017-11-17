@@ -1,5 +1,4 @@
 import networkx as nx
-import matplotlib.pyplot as plt
 
 
 class Graph:
@@ -81,16 +80,7 @@ class Graph:
 
 
 def main():
-    g = Graph(4)
-    for i in range(4):
-        for j in range(4):
-            g.set_dist(i,j,(i+1)*(j+1))
-    print(g.dist_str())
-    g.gen_min_spanning_tree()
-    print(g.tree_str())
-    g.cut_longest_conn(1)
-    print(g.tree_str())
-    print(g.get_connected_tree())
+    g = Graph(1000)
 
 if __name__ == "__main__":
     main()
