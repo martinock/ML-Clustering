@@ -49,11 +49,15 @@ class Graph:
         maxs, edges = [], []
         for _ in range(num):
             maxs.append(0.0); edges.append((-1,-1));
+
         for n, nadjs in self.data_graph.adj.items():
             for nadj, eattrs in nadjs.items():
+
                 if min(maxs) < eattrs['weight']:
-                    idx = maxs.index(min(maxs))
-                    maxs[idx], edges[idx]= eattrs['weight'], (n, nadj)
+                    if (nadj, n) not in edges:
+                        idx = maxs.index(min(maxs))
+                        maxs[idx], edges[idx]= eattrs['weight'], (n, nadj)
+
         self.data_graph.remove_edges_from(edges)
 
     def get_connected_tree(self):

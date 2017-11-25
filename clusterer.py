@@ -4,6 +4,9 @@ import pickle
 from scipy.spatial.distance import squareform, pdist
 from graph import Graph
 
+num_cluster = 15
+training_fraction = 0.01
+
 data_source = "CensusIncome\CencusIncome.data.txt"
 full_header = ["age", "workclass", "fnlwgt", "education", "education-num", "marital-status", "occupation", "relationship", "race", "sex", "capital-gain", "capital-loss", "hours-per-week", "native-country", "class"]
 numeric_header = ["age", "education-num", "capital-gain", "capital-loss", "hours-per-week"]
@@ -19,9 +22,11 @@ def read_numeric_training_data():
     return training_data
 
 
-def standardize_data(training_data):
-    means = training_data.mean()
-    sdts = training_data.std()
+def standardize_data(training_data, means=[], sdts=[]):
+    if not means:
+        means = training_data.mean()
+    if not sdts:
+        sdts = training_data.std()
     for coll in numeric_header:
         training_data[coll] = (training_data[coll] - means[coll]) / sdts[coll]
     return training_data, means, sdts
@@ -41,29 +46,45 @@ def generate_dist_tree(dist_matrix):
     return g
 
 
-def save_stat(means, sdts, dist_matrix):
+def clusterize_data(training_data):
+    dist_matrix = generate_dist_matrix(training_data)
+    dist_tree = generate_dist_tree(dist_matrix)
+    dist_tree.cut_longest_conn(num_cluster-1)
+
+    clusters = dist_tree.get_connected_tree()
+    cluster_data = []
+    for cluster in clusters:
+        cluster_data.append(training_data.iloc[list(cluster)])
+    return cluster_data
+
+
+def get_purity(data_list):
+    purities = []
+    for df in data_list:
+        mode = df["class"].mode().iloc[0]
+        purities.append(len(df.loc[df['class'] == mode]) / len(df))
+    return purities
+
+
+def save_data(data):
     with open(statistic_file, 'wb') as output:
-        pickle.dump([means, sdts, dist_matrix], output, pickle.HIGHEST_PROTOCOL)
+        pickle.dump(data, output, pickle.HIGHEST_PROTOCOL)
 
 
-def load_stat():
+def load_data():
     with open(statistic_file, 'rb') as input:
         data = pickle.load(input)
-        means = data[0]
-        sdts = data[1]
-        dist_matrix = data[2]
-        return means, sdts, dist_matrix
+        return data
 
 
 def main():
     data = read_numeric_training_data()
-    data = data.sample(frac=0.01, random_state=17)
-
+    data = data.sample(frac=training_fraction, random_state=17)
     data, means, sdts = standardize_data(data)
-    dist = generate_dist_matrix(data)
-    tree = generate_dist_tree(dist)
-    print(tree)
 
+    data = clusterize_data(data)
+
+    print(get_purity(data))
 
 if __name__ == "__main__":
     main()
