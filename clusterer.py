@@ -94,13 +94,26 @@ def predict_class(centroids, test_row):
     return best_centroid["class"]
 
 
-def get_accuracy(centroids, test_data):
-    correct_count = 0
+def get_accuracy_precision_recall(centroids, test_data):
+    true_positive_count = 0
+    true_negative_count = 0
+    false_positive_count = 0
+    false_negative_count = 0
     for index, row in test_data.iterrows():
         if predict_class(centroids, row) == row["class"]:
-            correct_count += 1
-    return correct_count / len(test_data)
-
+            if (row['class'] == ">50K"):
+                true_positive_count += 1
+            else:
+                true_negative_count += 1
+        else:
+            if predict_class(centroids, row) == "<=50K" and row['class'] == ">50K":
+                false_negative_count += 1
+            if predict_class(centroids, row) == ">50K" and row['class'] == "<=50K":
+                false_positive_count += 1
+    accuracy = (true_positive_count + true_negative_count) / len(test_data)
+    precision = true_positive_count / (true_positive_count + false_positive_count)
+    recall = true_positive_count / (true_positive_count + false_negative_count)
+    return accuracy, precision, recall
 
 def save_data(data):
     with open(statistic_file, 'wb') as output:
@@ -127,7 +140,10 @@ def main():
     centroids = generate_centroids(data_cluster)
 
     test_data, _, _ = standardize_data(data, means, sdts)
-    print(get_accuracy(centroids, test_data))
+    accuracy, precision, recall = get_accuracy_precision_recall(centroids, test_data)
+    print("Accuracy : {}".format(accuracy))
+    print("Precision : {}".format(precision))
+    print("Recall : {}".format(recall))
 
 
 if __name__ == "__main__":
