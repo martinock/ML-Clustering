@@ -179,5 +179,3 @@ tmtagsHistory
 *.sublime-project
 *.sublime-workspace
 .bundle
-
-*.pkl
