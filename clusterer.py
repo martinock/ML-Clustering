@@ -5,7 +5,7 @@ import pickle
 from scipy.spatial.distance import squareform, pdist
 from graph import Graph
 
-num_cluster = 50
+num_cluster = 10
 training_fraction = 0.5
 
 data_source = "CensusIncome\CencusIncome.data.txt"
@@ -17,8 +17,8 @@ statistic_file = 'data_stat.pkl'
 def read_numeric_training_data():
     training_data = pd.read_csv(data_source, header=None, index_col=False, names=full_header)
     training_data.replace('?', np.NaN)
-    training_data = training_data[numeric_header + ["class"]]
-    training_data = training_data.drop_duplicates(subset=numeric_header, keep='first')
+    # training_data = training_data[numeric_header + ["class"]]
+    # training_data = training_data.drop_duplicates(subset=numeric_header, keep='first')
     training_data.dropna(axis=0, how='any')
     return training_data
 
@@ -106,10 +106,11 @@ def get_accuracy_precision_recall(centroids, test_data):
             else:
                 true_negative_count += 1
         else:
-            if predict_class(centroids, row) == "<=50K" and row['class'] == ">50K":
-                false_negative_count += 1
-            if predict_class(centroids, row) == ">50K" and row['class'] == "<=50K":
+            if predict_class(centroids, row) == ">50K":
                 false_positive_count += 1
+            else:
+                false_negative_count += 1
+    print("TP : {}, TN : {}, FP : {}, FN : {}".format(true_positive_count, true_negative_count, false_positive_count, false_negative_count))
     accuracy = (true_positive_count + true_negative_count) / len(test_data)
     precision = true_positive_count / (true_positive_count + false_positive_count)
     recall = true_positive_count / (true_positive_count + false_negative_count)
