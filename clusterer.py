@@ -5,10 +5,10 @@ import pickle
 from scipy.spatial.distance import squareform, pdist
 from graph import Graph
 
-num_cluster = 10
+num_cluster = 2
 training_fraction = 0.5
 
-data_source = "CensusIncome\CencusIncome.data.txt"
+data_source = "CensusIncome\CencusIncome.test.txt"
 full_header = ["age", "workclass", "fnlwgt", "education", "education-num", "marital-status", "occupation", "relationship", "race", "sex", "capital-gain", "capital-loss", "hours-per-week", "native-country", "class"]
 numeric_header = ["age", "education-num", "capital-gain", "capital-loss", "hours-per-week"]
 statistic_file = 'data_stat.pkl'
@@ -112,8 +112,14 @@ def get_accuracy_precision_recall(centroids, test_data):
                 false_negative_count += 1
     print("TP : {}, TN : {}, FP : {}, FN : {}".format(true_positive_count, true_negative_count, false_positive_count, false_negative_count))
     accuracy = (true_positive_count + true_negative_count) / len(test_data)
-    precision = true_positive_count / (true_positive_count + false_positive_count)
-    recall = true_positive_count / (true_positive_count + false_negative_count)
+    if (true_positive_count + false_positive_count != 0):
+        precision = true_positive_count / (true_positive_count + false_positive_count)
+    else:
+        precision = float("inf")
+    if (true_positive_count + false_negative_count != 0):
+        recall = true_positive_count / (true_positive_count + false_negative_count)
+    else:
+        recall = float("inf")
     return accuracy, precision, recall
 
 def save_data(data):
