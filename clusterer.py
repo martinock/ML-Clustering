@@ -5,7 +5,7 @@ import pickle
 from scipy.spatial.distance import squareform, pdist
 from graph import Graph
 
-num_cluster = 2
+num_cluster = 8 #The most optimal num_cluster for now
 training_fraction = 0.5
 
 data_source = "CensusIncome\CencusIncome.test.txt"
